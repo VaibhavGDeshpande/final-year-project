@@ -41,6 +41,11 @@ class StorePredictionAPI:
             dict: Prediction results with probability, class, and confidence
         """
         # Select appropriate model and features
+        SUPPORTED_CATEGORIES = {'retail', 'food'}
+        if category not in SUPPORTED_CATEGORIES:
+            print(f"⚠️  Unknown category '{category}', defaulting to 'retail'")
+            category = 'retail'
+
         if category == 'retail':
             model = self.retail_model
             required_features = self.retail_features

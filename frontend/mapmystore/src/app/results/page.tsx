@@ -42,6 +42,10 @@ interface SiteAnalysisResponse {
     successProbability: number;
     expectedRevenue: number;
 
+    // New ML model outputs (from upgraded model)
+    confidenceLevel?: 'VERY_HIGH' | 'HIGH' | 'MEDIUM' | 'LOW' | 'VERY_LOW';
+    recommendation?: 'RECOMMENDED' | 'NOT_RECOMMENDED';
+
     // Feature Breakdown
     demand: {
       demandScore: number;
@@ -65,6 +69,38 @@ interface SiteAnalysisResponse {
     lng: number;
     intensity: number;
   }>;
+}
+
+// =====================
+// Helpers
+// =====================
+function ConfidenceBadge({ level }: { level?: string }) {
+  if (!level) return null;
+  const styles: Record<string, string> = {
+    VERY_HIGH: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    HIGH: 'bg-green-100 text-green-700 border-green-200',
+    MEDIUM: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+    LOW: 'bg-orange-100 text-orange-700 border-orange-200',
+    VERY_LOW: 'bg-red-100 text-red-700 border-red-200',
+  };
+  const label = level.replace('_', ' ');
+  return (
+    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${styles[level] ?? 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+      {label}
+    </span>
+  );
+}
+
+function RecommendationChip({ value }: { value?: string }) {
+  if (!value) return null;
+  const isRec = value === 'RECOMMENDED';
+  return (
+    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+      isRec ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-gray-100 text-gray-500 border-gray-200'
+    }`}>
+      {isRec ? '✓ Recommended' : '✗ Not Recommended'}
+    </span>
+  );
 }
 
 // =====================
@@ -201,7 +237,7 @@ function ResultsContent() {
                   }`}
               >
                 {/* Top Row: Score & Revenue */}
-                <div className="mb-4 flex items-start justify-between">
+                <div className="mb-3 flex items-start justify-between">
                   <div className="flex items-center gap-4">
                     <div className={`flex h-16 w-16 flex-col items-center justify-center rounded-2xl ${site.successScore >= 80 ? 'bg-green-100 text-green-700' :
                         site.successScore >= 60 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
@@ -223,10 +259,16 @@ function ResultsContent() {
                   </div>
 
                   <div className="text-right">
-                    <div className="inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+                    <div className="inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 mb-1">
                       Rank #{index + 1}
                     </div>
                   </div>
+                </div>
+
+                {/* ML Model Badges */}
+                <div className="mb-3 flex flex-wrap gap-1.5 items-center">
+                  <ConfidenceBadge level={site.confidenceLevel} />
+                  <RecommendationChip value={site.recommendation} />
                 </div>
 
                 {/* Middle Row: Key Factors */}

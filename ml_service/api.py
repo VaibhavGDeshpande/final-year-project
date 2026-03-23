@@ -2,7 +2,7 @@ import sys
 import os
 from pathlib import Path
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Dict, Any, List, Optional
 
 # Add project root to path to import models
@@ -39,18 +39,40 @@ except Exception as e:
     print(f"Failed to initialize predictor: {e}")
     predictor = None
 
+SUPPORTED_CATEGORIES = {'retail', 'food'}
+
 class LocationRequest(BaseModel):
     latitude: float
     longitude: float
     category: str = 'retail'
     features: Optional[Dict[str, Any]] = None
 
+    @field_validator('category')
+    @classmethod
+    def validate_category(cls, v):
+        normalized = v.lower()
+        if normalized not in SUPPORTED_CATEGORIES:
+            raise ValueError(f"Category '{v}' is not supported. Supported categories: {list(SUPPORTED_CATEGORIES)}")
+        return normalized
+
 class BatchRequest(BaseModel):
     locations: List[LocationRequest]
 
 @app.get("/")
 def read_root():
-    return {"status": "online", "service": "Store Prediction API"}
+    return {"status": "online", "service": "Store Prediction API", "supported_categories": list(SUPPORTED_CATEGORIES)}
+
+@app.get("/model-info")
+def model_info():
+    """Returns accuracy metrics for all loaded models."""
+    info = {}
+    metrics_dir = project_root / 'models' / 'category_specific' / 'optimized'
+    for f in metrics_dir.glob('*_optimized_metrics.json'):
+        category = f.stem.replace('_optimized_metrics', '')
+        with open(f) as fp:
+            import json
+            info[category] = json.load(fp)
+    return {"models": info, "status": "loaded" if predictor else "not_loaded"}
 
 @app.post("/predict")
 async def predict_location(request: LocationRequest):

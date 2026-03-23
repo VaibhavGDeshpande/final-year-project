@@ -64,17 +64,27 @@ export default function MapVisualization({ center, rankings, heatmapData }: MapP
 
         // 1. Add Heatmap Layer
         if (heatmapData.length > 0) {
-            const heatPoints = heatmapData.map((p) => [p.lat, p.lng, p.intensity]);
+            // Normalize intensities so the map shows relative hotspots instead of a solid block
+            const intensities = heatmapData.map(p => p.intensity);
+            const minIntensity = Math.min(...intensities);
+            const maxIntensity = Math.max(...intensities);
+            const range = maxIntensity - minIntensity || 1;
+
+            const heatPoints = heatmapData.map((p) => [
+                p.lat, 
+                p.lng, 
+                (p.intensity - minIntensity) / range // 0.0 to 1.0
+            ]);
+
             (L as any).heatLayer(heatPoints, {
-                radius: 25,
+                radius: 18,
                 blur: 15,
-                maxZoom: 14,
+                maxZoom: 13,
                 max: 1.0,
                 gradient: {
-                    0.4: "blue",
-                    0.6: "cyan",
-                    0.7: "lime",
-                    0.8: "yellow",
+                    0.3: "blue",
+                    0.5: "lime",
+                    0.7: "yellow",
                     1.0: "red",
                 },
             }).addTo(map);

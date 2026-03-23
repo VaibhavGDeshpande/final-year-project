@@ -2,8 +2,40 @@ import { getCandidateLocations } from '../city/service.js';
 import { demographicRepository } from '../demographics/repository.js';
 import { runBatchMLPredictions } from '../../ml/mlService.js';
 
+/**
+ * Map frontend store type to ML model category.
+ * The upgraded model supports two categories: 'retail' and 'food'.
+ */
+function mapStoreTypeToMLCategory(type) {
+    const mapping = {
+        retail: 'retail',
+        pharmacy: 'retail',
+        clothing: 'retail',
+        logistics: 'retail',
+        cafe: 'food',
+        restaurant: 'food',
+        food: 'food',
+    };
+    return mapping[type?.toLowerCase()] ?? 'retail'; // Default to retail
+}
+
+/**
+ * Average ticket size per store type (for revenue estimation).
+ */
+const AVG_TICKET_BY_TYPE = {
+    cafe: 300,
+    restaurant: 350,
+    food: 300,
+    pharmacy: 400,
+    clothing: 1200,
+    retail: 800,
+    logistics: 2000,
+};
+
 export async function analyzeSite(criteria) {
     const { city, type, budget, radius } = criteria;
+    const mlCategory = mapStoreTypeToMLCategory(type);
+    const avgTicket = AVG_TICKET_BY_TYPE[type?.toLowerCase()] ?? 800;
 
     const candidates = await getCandidateLocations(city);
 
@@ -23,7 +55,7 @@ export async function analyzeSite(criteria) {
         return {
             latitude: hex.lat,
             longitude: hex.lng,
-            category: type, // 'retail' or 'food'
+            category: mlCategory, // mapped to 'retail' or 'food'
             features: {
                 // Core demographic features
                 total_population: population,
@@ -68,7 +100,6 @@ export async function analyzeSite(criteria) {
         // Simple formula: Footfall * Conversion * AvgTicket
         // We can use successProbability as a proxy for 'demand'
         const estimatedFootfall = Math.round(population * 0.05 * successProbability); // Daily
-        const avgTicket = type === 'cafe' ? 300 : 800;
         const monthlyRevenue = estimatedFootfall * 30 * 0.1 * avgTicket; 
 
         // Cost Calculation (Heuristic based on location/success)
@@ -102,6 +133,10 @@ export async function analyzeSite(criteria) {
             successProbability: Math.round(successProbability * 100), 
             expectedRevenue: Math.round(monthlyRevenue),
 
+            // New model-level outputs (passed through from upgraded model)
+            confidenceLevel: prediction.confidence_level || undefined,
+            recommendation: predictedClass === 1 ? 'RECOMMENDED' : 'NOT_RECOMMENDED',
+
             // Feature Breakdown
             demand: {
                 demandScore: parseFloat(successProbability.toFixed(2)),
@@ -117,7 +152,7 @@ export async function analyzeSite(criteria) {
             metrics: {
                 rent: Math.round(estimatedRent),
                 footfall: estimatedFootfall,
-                competition: "Moderate" // We could get this from ML features if exposed
+                competition: "Moderate"
             }
         };
     });
