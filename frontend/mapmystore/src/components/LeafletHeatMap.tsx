@@ -16,6 +16,9 @@ export default function LeafletHeatmap({ city }: Props) {
     if (!mapRef.current || !city) return;
 
     const loadMap = async () => {
+      const mapElement = mapRef.current;
+      if (!mapElement) return;
+
       const L = (await import("leaflet")).default;
       await import("leaflet.heat");
 
@@ -36,7 +39,7 @@ export default function LeafletHeatmap({ city }: Props) {
       }
 
       // 🗺️ Create map
-      mapInstance.current = L.map(mapRef.current).setView(
+      mapInstance.current = L.map(mapElement).setView(
         [lat, lon],
         12
       );
