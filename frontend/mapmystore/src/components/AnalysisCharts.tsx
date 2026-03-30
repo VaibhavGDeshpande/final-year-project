@@ -84,8 +84,8 @@ export default function AnalysisCharts({ rankings }: ChartProps) {
         <div className="space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Bar Chart: Revenue Projection */}
-                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                    <h3 className="text-sm font-bold text-gray-700 uppercase mb-4">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm transition-colors">
+                    <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-4">
                         Revenue Projection (Top 5 Candidates)
                     </h3>
                     <div className="h-[300px] w-full">
@@ -105,13 +105,13 @@ export default function AnalysisCharts({ rankings }: ChartProps) {
                 </div>
 
                 {/* Scatter Chart: Probability vs Revenue */}
-                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                    <h3 className="text-sm font-bold text-gray-700 uppercase mb-4">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm transition-colors">
+                    <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-4">
                         Success Probability vs Expected Revenue
                     </h3>
                     <div className="h-[300px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 40 }}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis
                                     type="number"
@@ -126,7 +126,7 @@ export default function AnalysisCharts({ rankings }: ChartProps) {
                                     dataKey="y"
                                     name="Est. Revenue"
                                     tickFormatter={(val) => `₹${val/1000}k`}
-                                    label={{ value: 'Expected Revenue (₹) →', angle: -90, position: 'insideLeft', fontSize: 12 }}
+                                    label={{ value: 'Expected Revenue (₹) →', angle: -90, position: 'insideLeft', offset: 10, fontSize: 12, dx: -40 }}
                                 />
                                 <Tooltip 
                                     cursor={{ strokeDasharray: "3 3" }} 
@@ -148,8 +148,8 @@ export default function AnalysisCharts({ rankings }: ChartProps) {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Pie Chart: Confidence Dist */}
-                <div className="lg:col-span-1 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                    <h3 className="text-sm font-bold text-gray-700 uppercase mb-4">
+                <div className="lg:col-span-1 bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm transition-colors">
+                    <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-4">
                         Model Confidence Distribution
                     </h3>
                     <div className="h-[250px] w-full">
@@ -176,31 +176,31 @@ export default function AnalysisCharts({ rankings }: ChartProps) {
                 </div>
 
                 {/* Summary Panel */}
-                <div className="lg:col-span-2 bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-xl border border-blue-100 shadow-sm flex flex-col justify-center">
-                    <h3 className="text-lg font-bold text-indigo-900 mb-2">
+                <div className="lg:col-span-2 bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-gray-800 dark:to-gray-700 p-6 rounded-xl border border-blue-100 dark:border-gray-600 shadow-sm flex flex-col justify-center transition-colors">
+                    <h3 className="text-lg font-bold text-indigo-900 dark:text-indigo-100 mb-2">
                         XGBoost Insights Report
                     </h3>
-                    <p className="text-indigo-800 text-sm mb-4 leading-relaxed">
+                    <p className="text-indigo-800 dark:text-indigo-200 text-sm mb-4 leading-relaxed">
                         The ML model evaluated <strong>{rankings.length}</strong> viable candidates. The highest potential revenue identified is 
                         <strong> ₹{topRevenue.toLocaleString('en-IN')}</strong> per month. The candidates exhibit an average success probability of 
                         <strong> {Math.round(avgProb)}%</strong> based on the target demographic.
                     </p>
                     <div className="grid grid-cols-3 gap-4 mb-4">
-                        <div className="bg-white/60 p-3 rounded-lg">
-                            <div className="text-xs text-indigo-500 uppercase font-semibold">Avg Success Score</div>
-                            <div className="text-2xl font-bold text-indigo-900">
+                        <div className="bg-white/60 dark:bg-gray-900/40 p-3 rounded-lg border border-transparent dark:border-gray-800/50">
+                            <div className="text-xs text-indigo-500 dark:text-indigo-400 uppercase font-semibold">Avg Success Score</div>
+                            <div className="text-2xl font-bold text-indigo-900 dark:text-indigo-100">
                                 {Math.round(avgScore)}/100
                             </div>
                         </div>
-                        <div className="bg-white/60 p-3 rounded-lg">
-                            <div className="text-xs text-indigo-500 uppercase font-semibold">Max Revenue</div>
-                            <div className="text-2xl font-bold text-green-700">
+                        <div className="bg-white/60 dark:bg-gray-900/40 p-3 rounded-lg border border-transparent dark:border-gray-800/50">
+                            <div className="text-xs text-indigo-500 dark:text-indigo-400 uppercase font-semibold">Max Revenue</div>
+                            <div className="text-2xl font-bold text-green-700 dark:text-green-500">
                                 ₹{(topRevenue / 1000).toFixed(1)}k
                             </div>
                         </div>
-                        <div className="bg-white/60 p-3 rounded-lg">
-                            <div className="text-xs text-indigo-500 uppercase font-semibold">Top Location</div>
-                            <div className="text-lg font-bold text-indigo-900 truncate" title={rankings[0]?.ward}>
+                        <div className="bg-white/60 dark:bg-gray-900/40 p-3 rounded-lg border border-transparent dark:border-gray-800/50">
+                            <div className="text-xs text-indigo-500 dark:text-indigo-400 uppercase font-semibold">Top Location</div>
+                            <div className="text-lg font-bold text-indigo-900 dark:text-indigo-100 truncate" title={rankings[0]?.ward}>
                                 {rankings[0]?.ward || "Unknown Ward"}
                             </div>
                         </div>

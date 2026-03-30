@@ -68,8 +68,8 @@ export default function StoreForm() {
   };
 
   return (
-    <div className="rounded-xl bg-white p-6 shadow-sm border border-gray-100">
-      <h2 className="mb-6 text-xl font-semibold text-gray-800 border-b border-gray-50 pb-2">
+    <div className="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
+      <h2 className="mb-6 text-xl font-semibold text-gray-800 dark:text-gray-100 border-b border-gray-50 dark:border-gray-700 pb-2">
         Store Configuration
       </h2>
 
@@ -87,7 +87,7 @@ export default function StoreForm() {
             <label className="text-xs font-medium text-gray-500 uppercase">City</label>
             <input
               placeholder="e.g. pune"
-              className="w-full rounded-lg border border-gray-200 p-2 text-sm focus:border-blue-500 focus:ring-1 outline-none transition-all"
+              className="w-full rounded-lg border border-gray-200 dark:border-gray-600 p-2 text-sm focus:border-blue-500 focus:ring-1 outline-none bg-transparent dark:bg-gray-700 dark:text-white transition-all"
               value={city}
               onChange={(e) => setCity(e.target.value)}
             />
@@ -96,7 +96,7 @@ export default function StoreForm() {
           <div className="space-y-1">
             <label className="text-xs font-medium text-gray-500 uppercase">Store Type</label>
             <select
-              className="w-full rounded-lg border border-gray-200 p-2 text-sm focus:border-blue-500 focus:ring-1 outline-none bg-white transition-all"
+              className="w-full rounded-lg border border-gray-200 dark:border-gray-600 p-2 text-sm focus:border-blue-500 focus:ring-1 outline-none bg-transparent dark:bg-gray-700 dark:text-white transition-all"
               value={type}
               onChange={(e) => setType(e.target.value)}
             >
@@ -114,7 +114,7 @@ export default function StoreForm() {
             <input
               type="number"
               placeholder="e.g. 500000"
-              className="w-full rounded-lg border border-gray-200 p-2 text-sm focus:border-blue-500 focus:ring-1 outline-none transition-all"
+              className="w-full rounded-lg border border-gray-200 dark:border-gray-600 p-2 text-sm focus:border-blue-500 focus:ring-1 outline-none bg-transparent dark:bg-gray-700 dark:text-white transition-all"
               value={budget}
               onChange={(e) => setBudget(e.target.value)}
             />
@@ -125,7 +125,7 @@ export default function StoreForm() {
             <input
               type="number"
               placeholder="1-20"
-              className="w-full rounded-lg border border-gray-200 p-2 text-sm focus:border-blue-500 focus:ring-1 outline-none transition-all"
+              className="w-full rounded-lg border border-gray-200 dark:border-gray-600 p-2 text-sm focus:border-blue-500 focus:ring-1 outline-none bg-transparent dark:bg-gray-700 dark:text-white transition-all"
               value={radius}
               onChange={(e) => setRadius(e.target.value)}
             />
@@ -137,7 +137,7 @@ export default function StoreForm() {
           <div className="space-y-1">
             <label className="text-xs font-medium text-gray-500 uppercase">Income Level (Optional)</label>
             <select
-              className="w-full rounded-lg border border-gray-200 p-2 text-sm focus:border-blue-500 focus:ring-1 outline-none bg-white transition-all"
+              className="w-full rounded-lg border border-gray-200 dark:border-gray-600 p-2 text-sm focus:border-blue-500 focus:ring-1 outline-none bg-transparent dark:bg-gray-700 dark:text-white transition-all"
               value={income}
               onChange={(e) => setIncome(e.target.value)}
             >
@@ -151,7 +151,7 @@ export default function StoreForm() {
           <div className="space-y-1">
             <label className="text-xs font-medium text-gray-500 uppercase">Preferred Zone (Optional)</label>
             <select
-              className="w-full rounded-lg border border-gray-200 p-2 text-sm focus:border-blue-500 focus:ring-1 outline-none bg-white transition-all"
+              className="w-full rounded-lg border border-gray-200 dark:border-gray-600 p-2 text-sm focus:border-blue-500 focus:ring-1 outline-none bg-transparent dark:bg-gray-700 dark:text-white transition-all"
               value={zone}
               onChange={(e) => setZone(e.target.value)}
             >
@@ -172,8 +172,8 @@ export default function StoreForm() {
                   key={p}
                   onClick={() => toggleProximity(p)}
                   className={`px-3 py-1 text-xs rounded-full border transition-all ${proximity.includes(p)
-                    ? 'bg-blue-100 border-blue-200 text-blue-700 font-medium'
-                    : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                    ? 'bg-blue-100 dark:bg-blue-900/50 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 font-medium'
+                    : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                     }`}
                 >
                   {p}

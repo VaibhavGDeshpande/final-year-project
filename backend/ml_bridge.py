@@ -253,7 +253,7 @@ def run(payload):
         key=lambda r: r['suitabilityScore'] * 0.7 + r['costScore'] * 30,
         reverse=True
     )
-    return results[:50]
+    return results[:150]
 
 
 if __name__ == '__main__':
