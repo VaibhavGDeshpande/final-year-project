@@ -10,8 +10,12 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
+
 COPY requirements.txt requirements_ml.txt ./
-RUN pip3 install --no-cache-dir -r requirements.txt -r requirements_ml.txt
+RUN python3 -m venv "${VIRTUAL_ENV}" \
+    && pip install --no-cache-dir -r requirements.txt -r requirements_ml.txt
 
 COPY backend/package*.json ./backend/
 RUN cd backend && npm install
