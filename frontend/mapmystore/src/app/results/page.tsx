@@ -71,6 +71,9 @@ interface SiteAnalysisResponse {
   }>;
 }
 
+const apiBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || "").replace(/\/$/, "");
+const analyzeSiteEndpoint = `${apiBaseUrl}/api/analyze-site`;
+
 // =====================
 // Helpers
 // =====================
@@ -137,7 +140,7 @@ function ResultsContent() {
 
     const fetchData = async () => {
       try {
-        const res = await fetch("http://localhost:3005/api/analyze-site", {
+        const res = await fetch(analyzeSiteEndpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
