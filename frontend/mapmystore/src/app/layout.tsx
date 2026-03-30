@@ -1,5 +1,11 @@
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
+import AuthProvider from "@/components/AuthProvider";
+
+export const metadata = {
+  title: "MapMyStore - AI Retail Optimization",
+  description: "Machine Learning–Based Retail Site Optimization System",
+};
 
 export default function RootLayout({
   children,
@@ -8,7 +14,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }

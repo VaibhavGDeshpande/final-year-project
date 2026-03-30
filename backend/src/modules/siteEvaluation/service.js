@@ -157,8 +157,13 @@ export async function analyzeSite(criteria) {
         };
     });
 
-    // 3. Sort by Suitability
-    scoredCandidates.sort((a, b) => b.suitabilityScore - a.suitabilityScore);
+    // 3. Sort by Suitability, then by Expected Revenue as a tie-breaker
+    scoredCandidates.sort((a, b) => {
+        if (b.suitabilityScore !== a.suitabilityScore) {
+            return b.suitabilityScore - a.suitabilityScore;
+        }
+        return b.expectedRevenue - a.expectedRevenue;
+    });
 
     // 4. Generate Heatmap Data (from demand scores)
     const heatmap = scoredCandidates.map(c => ({

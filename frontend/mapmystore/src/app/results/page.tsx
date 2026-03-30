@@ -120,6 +120,8 @@ function ResultsContent() {
   const [data, setData] = useState<SiteAnalysisResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // =====================
   // Fetch backend data
@@ -201,6 +203,12 @@ function ResultsContent() {
   // =====================
   // Render
   // =====================
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentRankings = data.rankings.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(data.rankings.length / itemsPerPage);
+  const currentHeatmapData = data.heatmap?.slice(indexOfFirstItem, indexOfLastItem) ?? [];
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="mx-auto max-w-7xl">
@@ -215,12 +223,20 @@ function ResultsContent() {
             </p>
           </div>
 
-          <ExportPanel />
+          <ExportPanel exportData={data.rankings} city={data.meta.city} />
         </div>
 
         {/* Charts */}
         <div className="mb-10">
-          <h2 className="mb-4 text-xl font-bold">Market Intelligence</h2>
+          <div className="flex items-center justify-between mb-4">
+             <h2 className="text-xl font-bold">Market Intelligence</h2>
+             <Link href="/docs/metrics" target="_blank" className="text-sm flex items-center gap-1.5 font-medium text-blue-700 bg-blue-50 border border-blue-200 shadow-sm hover:bg-blue-100 hover:shadow-md px-3 py-1.5 rounded-lg transition-all">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                How to read these charts
+             </Link>
+          </div>
           <AnalysisCharts rankings={data.rankings} />
         </div>
 
@@ -228,10 +244,12 @@ function ResultsContent() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Rankings List */}
           <div className="space-y-4">
-            {data.rankings.map((site, index) => (
+            {currentRankings.map((site, index) => {
+              const globalIndex = indexOfFirstItem + index + 1;
+              return (
               <div
                 key={site.id}
-                className={`rounded-xl border bg-white p-5 transition hover:shadow-md ${index === 0
+                className={`rounded-xl border bg-white p-5 transition hover:shadow-md ${index === 0 && currentPage === 1
                     ? "border-blue-400 ring-1 ring-blue-400"
                     : "border-gray-200"
                   }`}
@@ -250,7 +268,7 @@ function ResultsContent() {
                         Est. Monthly Revenue
                       </div>
                       <div className="text-xl font-bold text-gray-900">
-                        ₹{site.expectedRevenue.toLocaleString()}
+                        ₹{site.expectedRevenue.toLocaleString('en-IN')}
                       </div>
                       <div className="text-xs text-green-600 font-medium">
                         {site.successProbability}% Success Probability
@@ -260,7 +278,7 @@ function ResultsContent() {
 
                   <div className="text-right">
                     <div className="inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 mb-1">
-                      Rank #{index + 1}
+                      Rank #{globalIndex}
                     </div>
                   </div>
                 </div>
@@ -291,26 +309,49 @@ function ResultsContent() {
                   <div>
                     <div className="text-xs text-gray-400">Rent Estimate</div>
                     <div className="font-medium text-gray-800">
-                      ₹{site.metrics.rent.toLocaleString()}
+                      ₹{site.metrics.rent.toLocaleString('en-IN')}
                     </div>
                   </div>
                   <div>
                     <div className="text-xs text-gray-400">Footfall/Day</div>
                     <div className="font-medium text-gray-800">
-                      ~{site.metrics.footfall.toLocaleString()}
+                      ~{site.metrics.footfall.toLocaleString('en-IN')}
                     </div>
                   </div>
                 </div>
               </div>
-            ))}
+            )})}
+            
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-4 mt-6 p-4">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-50 disabled:opacity-50 text-sm font-medium"
+                >
+                  Previous
+                </button>
+                <div className="text-sm font-semibold text-gray-700">
+                  Page {currentPage} of {totalPages}
+                </div>
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-50 disabled:opacity-50 text-sm font-medium"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Map */}
           <div className="sticky top-6 h-[600px] rounded-xl border bg-white shadow-sm overflow-hidden">
             <MapVisualization
-              center={[data.rankings[0].lat, data.rankings[0].lng]}
-              rankings={data.rankings}
-              heatmapData={data.heatmap ?? []}
+              center={[currentRankings[0]?.lat || data.rankings[0].lat, currentRankings[0]?.lng || data.rankings[0].lng]}
+              rankings={currentRankings}
+              heatmapData={currentHeatmapData}
             />
           </div>
         </div>

@@ -21,6 +21,10 @@ interface MapProps {
         lat: number;
         lng: number;
         suitabilityScore: number;
+        successScore?: number;
+        successProbability?: number;
+        expectedRevenue?: number;
+        confidenceLevel?: string;
         rank?: number;
     }>;
     heatmapData: Array<{
@@ -95,15 +99,17 @@ export default function MapVisualization({ center, rankings, heatmapData }: MapP
             const isTopValues = index < 3;
 
             const marker = L.marker([site.lat, site.lng], {
-                title: `Rank #${index + 1} (Score: ${site.suitabilityScore})`,
+                title: `Rank #${index + 1} (Score: ${site.successScore || site.suitabilityScore})`,
                 zIndexOffset: 1000 - index, // Top ranks on top
             })
                 .bindPopup(`
-        <div style="font-family: sans-serif; min-width: 150px;">
-            <strong style="color: #2563eb; font-size: 14px;">Rank #${index + 1}</strong>
-            <div style="font-size: 12px; margin-top: 4px; color: #4b5563;">
-                Hex: ${site.id}<br/>
-                Score: <strong>${site.suitabilityScore}</strong>
+        <div style="font-family: sans-serif; min-width: 160px; padding: 4px;">
+            <strong style="color: #2563eb; font-size: 15px;">Rank #${index + 1}</strong>
+            <div style="font-size: 13px; margin-top: 6px; color: #374151;">
+                <strong>Score:</strong> <span style="color:#059669">${site.successScore || site.suitabilityScore}/100</span><br/>
+                <strong>Est. Rev:</strong> ₹${site.expectedRevenue?.toLocaleString('en-IN') || 'N/A'}<br/>
+                <strong>Win Prob:</strong> ${site.successProbability || 'N/A'}%<br/>
+                <strong>ML Conf:</strong> <span style="font-size:10px; background:#f3f4f6; padding:2px 4px; border-radius:4px;">${site.confidenceLevel || 'N/A'}</span>
             </div>
         </div>
       `)

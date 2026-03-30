@@ -20,6 +20,11 @@ interface ChartProps {
     rankings: Array<{
         id: string;
         suitabilityScore: number;
+        successScore: number;
+        successProbability: number;
+        expectedRevenue: number;
+        confidenceLevel?: string;
+        recommendation?: string;
         demand: {
             demandScore: number;
             orderCount: number;
@@ -32,95 +37,102 @@ interface ChartProps {
 }
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
+const CONFIDENCE_COLORS: Record<string, string> = {
+    'VERY_HIGH': '#10b981',
+    'HIGH': '#34d399',
+    'MEDIUM': '#fbbf24',
+    'LOW': '#fb923c',
+    'VERY_LOW': '#ef4444'
+};
 
 export default function AnalysisCharts({ rankings }: ChartProps) {
-    // 1. Prepare Data for Bar Chart (Top 5 Scores Breakdown)
+    // 1. Prepare Data for Bar Chart (Top 5 Estimated Revenues)
     const barData = rankings.slice(0, 5).map((r, i) => ({
         name: `Rank #${i + 1}`,
-        Demand: r.demand.demandScore * 100, // Scales for better visibility
-        Coverage: r.coverageScore * 100,
-        Cost: r.costScore * 100,
+        Revenue: r.expectedRevenue,
+        Score: r.successScore,
     }));
 
-    // 2. Prepare Data for Scatter (Cost vs Coverage)
+    // 2. Prepare Data for Scatter (Revenue vs Probability)
     const scatterData = rankings.map((r, i) => ({
-        x: r.costScore,
-        y: r.coverageScore,
-        z: r.suitabilityScore, // bubble size?
-        name: `Hex ${r.id.substring(0, 6)}...`,
+        x: r.successProbability,
+        y: r.expectedRevenue,
+        z: r.successScore, // bubble size indicator
+        name: `Rank #${i + 1} (${r.ward || 'Hex'})`,
         index: i,
     }));
 
-    // 3. Prepare Data for Pie (Average Score Composition of Top 10)
-    // Determine which factor contributes most on average
-    const avgDemand =
-        rankings.reduce((sum, r) => sum + r.demand.demandScore, 0) /
-        rankings.length;
-    const avgCoverage =
-        rankings.reduce((sum, r) => sum + r.coverageScore, 0) / rankings.length;
-    const avgCost =
-        rankings.reduce((sum, r) => sum + r.costScore, 0) / rankings.length;
+    // 3. Prepare Data for Pie (Confidence Level Distribution)
+    const confidenceCounts: Record<string, number> = {};
+    rankings.forEach(r => {
+        const lvl = r.confidenceLevel || 'UNKNOWN';
+        confidenceCounts[lvl] = (confidenceCounts[lvl] || 0) + 1;
+    });
+    
+    const pieData = Object.entries(confidenceCounts).map(([name, value]) => ({
+        name: name.replace('_', ' '),
+        value,
+        originalName: name
+    }));
 
-    const pieData = [
-        { name: "Demand", value: avgDemand },
-        { name: "Coverage", value: avgCoverage },
-        { name: "Cost Efficiency", value: avgCost },
-    ];
+    // Summaries
+    const topRevenue = Math.max(0, ...rankings.map(r => r.expectedRevenue || 0));
+    const avgScore = rankings.reduce((sum, r) => sum + r.successScore, 0) / (rankings.length || 1);
+    const avgProb = rankings.reduce((sum, r) => sum + r.successProbability, 0) / (rankings.length || 1);
 
     return (
         <div className="space-y-8">
-            {/* Chart Row 1 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Bar Chart */}
+                {/* Bar Chart: Revenue Projection */}
                 <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                     <h3 className="text-sm font-bold text-gray-700 uppercase mb-4">
-                        Score Breakdown (Top 5)
+                        Revenue Projection (Top 5 Candidates)
                     </h3>
                     <div className="h-[300px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={barData}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                 <XAxis dataKey="name" fontSize={12} />
-                                <YAxis fontSize={12} domain={[0, 100]} />
+                                <YAxis fontSize={12} tickFormatter={(value) => `₹${value/1000}k`} />
                                 <Tooltip
+                                    formatter={(value: any) => [`₹${Number(value).toLocaleString('en-IN')}`, 'Estimated Revenue']}
                                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                                 />
-                                <Legend iconType="circle" />
-                                <Bar dataKey="Demand" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                                <Bar dataKey="Coverage" fill="#10b981" radius={[4, 4, 0, 0]} />
-                                <Bar dataKey="Cost" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="Revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
-                {/* Scatter Chart */}
+                {/* Scatter Chart: Probability vs Revenue */}
                 <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                     <h3 className="text-sm font-bold text-gray-700 uppercase mb-4">
-                        Cost vs. Coverage Trade-off
+                        Success Probability vs Expected Revenue
                     </h3>
                     <div className="h-[300px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                            <ScatterChart
-                                margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-                            >
-                                <CartesianGrid />
+                            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                                <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis
                                     type="number"
                                     dataKey="x"
-                                    name="Cost Score"
-                                    label={{ value: 'Cost Efficiency →', position: 'bottom', offset: 0, fontSize: 12 }}
-                                    domain={[0, 1]}
+                                    name="Success Prob"
+                                    unit="%"
+                                    domain={[0, 100]}
+                                    label={{ value: 'Success Probability (%) →', position: 'bottom', offset: 0, fontSize: 12 }}
                                 />
                                 <YAxis
                                     type="number"
                                     dataKey="y"
-                                    name="Coverage Score"
-                                    label={{ value: 'Coverage →', angle: -90, position: 'insideLeft', fontSize: 12 }}
-                                    domain={[0, 1]}
+                                    name="Est. Revenue"
+                                    tickFormatter={(val) => `₹${val/1000}k`}
+                                    label={{ value: 'Expected Revenue (₹) →', angle: -90, position: 'insideLeft', fontSize: 12 }}
                                 />
-                                <Tooltip cursor={{ strokeDasharray: "3 3" }} />
-                                <Scatter name="Locations" data={scatterData} fill="#8884d8">
+                                <Tooltip 
+                                    cursor={{ strokeDasharray: "3 3" }} 
+                                    formatter={(value: any, name: any) => [name === 'Est. Revenue' ? `₹${Number(value).toLocaleString('en-IN')}` : `${value}%`, name]}
+                                />
+                                <Scatter name="Candidates" data={scatterData}>
                                     {scatterData.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={index < 3 ? "#ef4444" : "#8884d8"} />
                                     ))}
@@ -129,57 +141,16 @@ export default function AnalysisCharts({ rankings }: ChartProps) {
                         </ResponsiveContainer>
                     </div>
                     <p className="text-xs text-gray-400 mt-2 text-center">
-                        * Red dots indicate Top 3 recommendations
-                    </p>
-                </div>
-            </div>
-            {/* Chart Row 1 - New Chart */}
-            <div className="grid grid-cols-1 gap-6">
-                {/* Population vs Suitability Chart */}
-                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm lg:col-span-2">
-                    <h3 className="text-sm font-bold text-gray-700 uppercase mb-4">
-                        Demographic Impact: Population vs. Suitability
-                    </h3>
-                    <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis
-                                    type="number"
-                                    dataKey="u"
-                                    name="Population"
-                                    unit=""
-                                    domain={['auto', 'auto']}
-                                    tickFormatter={(val) => (val / 1000).toFixed(0) + 'k'}
-                                    label={{ value: 'Ward Population', position: 'bottom', offset: 0 }}
-                                />
-                                <YAxis
-                                    type="number"
-                                    dataKey="v"
-                                    name="Suitability"
-                                    domain={[0, 100]}
-                                    label={{ value: 'Suitability Score', angle: -90, position: 'insideLeft' }}
-                                />
-                                <Tooltip cursor={{ strokeDasharray: "3 3" }} />
-                                <Scatter name="Wards" data={rankings.map(r => ({ u: r.population || 0, v: r.suitabilityScore, name: r.ward || 'Unknown' }))} fill="#82ca9d">
-                                    {rankings.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={index < 3 ? "#ef4444" : "#82ca9d"} />
-                                    ))}
-                                </Scatter>
-                            </ScatterChart>
-                        </ResponsiveContainer>
-                    </div>
-                    <p className="text-xs text-gray-400 mt-2 text-center">
-                        * Higher population areas often correlate with higher demand but may have higher costs.
+                        * Red dots indicate Top 3 recommended sites
                     </p>
                 </div>
             </div>
 
-            {/* Chart Row 2 - Pie & Summary */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Pie Chart: Confidence Dist */}
                 <div className="lg:col-span-1 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                     <h3 className="text-sm font-bold text-gray-700 uppercase mb-4">
-                        Average Factor Contribution
+                        Model Confidence Distribution
                     </h3>
                     <div className="h-[250px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
@@ -190,12 +161,11 @@ export default function AnalysisCharts({ rankings }: ChartProps) {
                                     cy="50%"
                                     innerRadius={60}
                                     outerRadius={80}
-                                    fill="#8884d8"
                                     paddingAngle={5}
                                     dataKey="value"
                                 >
                                     {pieData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        <Cell key={`cell-${index}`} fill={CONFIDENCE_COLORS[entry.originalName] || COLORS[index % COLORS.length]} />
                                     ))}
                                 </Pie>
                                 <Tooltip />
@@ -205,38 +175,39 @@ export default function AnalysisCharts({ rankings }: ChartProps) {
                     </div>
                 </div>
 
+                {/* Summary Panel */}
                 <div className="lg:col-span-2 bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-xl border border-blue-100 shadow-sm flex flex-col justify-center">
                     <h3 className="text-lg font-bold text-indigo-900 mb-2">
-                        Analysis Report Summary
+                        XGBoost Insights Report
                     </h3>
                     <p className="text-indigo-800 text-sm mb-4 leading-relaxed">
-                        Based on the analysis of <strong>{rankings.length}</strong> candidates, the top locations exhibit strong performance in
-                        {' '}{avgDemand > avgCost ? 'Demand' : 'Cost Efficiency'}.
-                        The recommended sites maximize the suitability index by balancing high order density with optimal coverage radii.
+                        The ML model evaluated <strong>{rankings.length}</strong> viable candidates. The highest potential revenue identified is 
+                        <strong> ₹{topRevenue.toLocaleString('en-IN')}</strong> per month. The candidates exhibit an average success probability of 
+                        <strong> {Math.round(avgProb)}%</strong> based on the target demographic.
                     </p>
                     <div className="grid grid-cols-3 gap-4 mb-4">
                         <div className="bg-white/60 p-3 rounded-lg">
-                            <div className="text-xs text-indigo-500 uppercase font-semibold">Avg Suitability</div>
+                            <div className="text-xs text-indigo-500 uppercase font-semibold">Avg Success Score</div>
                             <div className="text-2xl font-bold text-indigo-900">
-                                {Math.round(rankings.reduce((s, r) => s + r.suitabilityScore, 0) / rankings.length)}
+                                {Math.round(avgScore)}/100
                             </div>
                         </div>
                         <div className="bg-white/60 p-3 rounded-lg">
-                            <div className="text-xs text-indigo-500 uppercase font-semibold">Max Demand</div>
-                            <div className="text-2xl font-bold text-indigo-900">
-                                {Math.max(...rankings.map(r => r.demand.demandScore)).toFixed(2)}
+                            <div className="text-xs text-indigo-500 uppercase font-semibold">Max Revenue</div>
+                            <div className="text-2xl font-bold text-green-700">
+                                ₹{(topRevenue / 1000).toFixed(1)}k
                             </div>
                         </div>
                         <div className="bg-white/60 p-3 rounded-lg">
-                            <div className="text-xs text-indigo-500 uppercase font-semibold">Top Candidate</div>
-                            <div className="text-lg font-bold text-indigo-900 truncate" title={rankings[0]?.id}>
-                                {rankings[0]?.id.substring(0, 8)}...
+                            <div className="text-xs text-indigo-500 uppercase font-semibold">Top Location</div>
+                            <div className="text-lg font-bold text-indigo-900 truncate" title={rankings[0]?.ward}>
+                                {rankings[0]?.ward || "Unknown Ward"}
                             </div>
                         </div>
                     </div>
 
                     <button
-                        onClick={() => alert("Printing Report PDF... (Feature Mock)")}
+                        onClick={() => alert("Downloading Report... (Feature Mock)")}
                         className="self-start px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition shadow-sm flex items-center gap-2"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -4,8 +4,9 @@ import { MLAdapter } from './mlAdapter.js';
 export class PythonServiceAdapter extends MLAdapter {
   async predict(data) {
     try {
+      const mlUrl = process.env.ML_SERVICE_URL.replace('localhost', '127.0.0.1');
       const res = await axios.post(
-        process.env.ML_SERVICE_URL,
+        mlUrl,
         {
           latitude: data.latitude,
           longitude: data.longitude,
@@ -24,8 +25,9 @@ export class PythonServiceAdapter extends MLAdapter {
   async predictBatch(locations) {
     try {
       // The ML service expects { locations: [...] }
+      const batchUrl = process.env.ML_SERVICE_URL.replace('localhost', '127.0.0.1').replace('/predict', '/predict-batch');
       const res = await axios.post(
-        process.env.ML_SERVICE_URL.replace('/predict', '/predict-batch'),
+        batchUrl,
         {
           locations: locations.map(loc => ({
             latitude: loc.latitude,
