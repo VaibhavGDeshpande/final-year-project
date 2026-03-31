@@ -1,6 +1,6 @@
 import DashboardLayout from "@/components/Dashboard/DashboardLayout";
 import StoreForm from "@/components/StoreForm";
-// import MapSection from "@/components/MapSection";
+import AnalysisHistory from "@/components/Dashboard/AnalysisHistory";
 // import ChartsSection from "@/components/ChartsSection";
 // import ResultsTable from "@/components/ResultsTable";
 
@@ -12,7 +12,7 @@ export default function DashboardPage() {
         Dashboard
       </h1>
         <StoreForm />
-        
+        <AnalysisHistory />
     {/* <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <MapSection />
         <ChartsSection />

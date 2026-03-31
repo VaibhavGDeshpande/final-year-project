@@ -198,13 +198,13 @@ export default function ResultsTable({ rankings, startIndex = 0, selectedId, onS
                           <div>
                             <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Core Demographics</h4>
                             <div className="space-y-4">
-                                <div className="flex justify-between items-center bg-white p-2.5 rounded-lg border border-gray-100">
-                                    <span className="text-xs text-gray-500">Population</span>
-                                    <span className="text-sm font-bold">~{site.population?.toLocaleString('en-IN') || 'N/A'}</span>
+                                <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-2.5 rounded-lg border border-gray-100 dark:border-gray-700">
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">Population</span>
+                                    <span className="text-sm font-bold dark:text-gray-100">~{site.population?.toLocaleString('en-IN') || 'N/A'}</span>
                                 </div>
-                                <div className="flex justify-between items-center bg-white p-2.5 rounded-lg border border-gray-100">
-                                    <span className="text-xs text-gray-500">Daily Footfall</span>
-                                    <span className="text-sm font-bold">{site.metrics.footfall.toLocaleString('en-IN')}</span>
+                                <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-2.5 rounded-lg border border-gray-100 dark:border-gray-700">
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">Daily Footfall</span>
+                                    <span className="text-sm font-bold dark:text-gray-100">{site.metrics.footfall.toLocaleString('en-IN')}</span>
                                 </div>
                             </div>
                           </div>
@@ -212,13 +212,13 @@ export default function ResultsTable({ rankings, startIndex = 0, selectedId, onS
                           <div>
                             <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Financial Feasibility</h4>
                             <div className="space-y-4">
-                                <div className="flex justify-between items-center bg-white p-2.5 rounded-lg border border-gray-100">
-                                    <span className="text-xs text-gray-500">Rent Est. (Monthly)</span>
-                                    <span className="text-sm font-bold text-red-600">₹{site.metrics.rent.toLocaleString('en-IN')}</span>
+                                <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-2.5 rounded-lg border border-gray-100 dark:border-gray-700">
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">Rent Est. (Monthly)</span>
+                                    <span className="text-sm font-bold text-red-600 dark:text-red-400">₹{site.metrics.rent.toLocaleString('en-IN')}</span>
                                 </div>
-                                <div className="flex justify-between items-center bg-white p-2.5 rounded-lg border border-gray-100">
-                                    <span className="text-xs text-gray-500">Competition Complexity</span>
-                                    <span className="text-sm font-bold">{site.metrics.competition}</span>
+                                <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-2.5 rounded-lg border border-gray-100 dark:border-gray-700">
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">Competition Complexity</span>
+                                    <span className="text-sm font-bold dark:text-gray-100">{site.metrics.competition}</span>
                                 </div>
                             </div>
                           </div>
@@ -244,16 +244,16 @@ export default function ResultsTable({ rankings, startIndex = 0, selectedId, onS
                           </div>
                         </div>
                         
-                        <div className="mt-6 flex flex-col md:flex-row justify-between items-start md:items-center bg-blue-50/50 p-4 rounded-xl border border-blue-100 gap-4">
+                        <div className="mt-6 flex flex-col md:flex-row justify-between items-start md:items-center bg-blue-50/50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30 gap-4 transition-colors">
                             <div className="flex-1 pr-6">
-                                <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                                    <svg className="w-3.5 h-3.5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <h4 className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                                    <svg className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                     </svg>
                                     Exact Address
                                 </h4>
-                                <p className="text-sm font-medium text-gray-900 leading-snug">
+                                <p className="text-sm font-medium text-gray-900 dark:text-gray-200 leading-snug">
                                     {addresses[site.id] ? addresses[site.id] : <span className="text-gray-400 italic flex items-center gap-2"><div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div> Fetching address securely via OpenStreetMap...</span>}
                                 </p>
                             </div>
@@ -263,7 +263,7 @@ export default function ResultsTable({ rankings, startIndex = 0, selectedId, onS
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     onClick={(e) => e.stopPropagation()}
-                                    className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm active:scale-95"
+                                    className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm active:scale-95"
                                 >
                                     <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
