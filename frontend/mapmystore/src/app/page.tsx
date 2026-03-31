@@ -46,9 +46,9 @@ function FadeInSection({
 // ---------- Data ----------
 const stats = [
   { label: "Geospatial Features Analyzed", value: "35+" },
-  { label: "ML Accuracy (Validation Set)", value: "91%" },
+  { label: "ML Accuracy (Validation Set)", value: "82%" },
   { label: "Candidate Zones Ranked", value: "Top 10" },
-  { label: "Cities Supported", value: "∞" },
+  { label: "Cities Supported", value: "Pune" },
 ];
 
 const features = [
@@ -161,12 +161,12 @@ export default function HomePage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
             </Link>
-            <Link
+            {/* <Link
               href="/login"
               className="flex items-center justify-center rounded-full border border-gray-300 dark:border-white/20 bg-white/50 dark:bg-white/5 backdrop-blur px-8 py-4 text-sm font-bold text-gray-700 dark:text-white transition-all hover:bg-gray-100 dark:hover:bg-white/10 h-12"
             >
               Admin Login
-            </Link>
+            </Link> */}
           </motion.div>
         </motion.div>
 

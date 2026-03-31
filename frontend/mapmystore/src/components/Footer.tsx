@@ -27,16 +27,16 @@ export default function Footer() {
                         <ul className="space-y-3">
                             <li><Link href="/" className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Analyzer</Link></li>
                             <li><Link href="/dashboard" className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Dashboard</Link></li>
-                            <li><Link href="/pricing" className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Pricing</Link></li>
+                            <li><Link href="/team" className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Our Team</Link></li>
                         </ul>
                     </div>
 
                     <div>
                         <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-wider uppercase mb-4">Resources</h3>
                         <ul className="space-y-3">
-                            <li><Link href="/docs/metrics" className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">ML Metrics Documentation</Link></li>
+                            <li><Link href="/research" className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Research Paper</Link></li>
+                            <li><Link href="/docs/metrics" className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">ML Metrics Docs</Link></li>
                             <li><a href="#" className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">API Reference</a></li>
-                            <li><a href="#" className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Support</a></li>
                         </ul>
                     </div>
                 </div>

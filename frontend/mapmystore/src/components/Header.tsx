@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Header() {
     const pathname = usePathname();
-    const { data: session } = useSession();
+    const router = useRouter();
+    const { user, provider, loading, signOut } = useAuth();
     const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -17,11 +18,31 @@ export default function Header() {
         setMounted(true);
     }, []);
 
+    const handleSignOut = async () => {
+        await signOut();
+        router.push("/login");
+    };
+
     const navLinks = [
         { name: "Home", href: "/" },
         { name: "Dashboard", href: "/dashboard" },
-        { name: "ML Metrics Docs", href: "/docs/metrics" }
+        { name: "Research", href: "/research" },
+        { name: "Our Team", href: "/team" },
+        { name: "ML Metrics", href: "/docs/metrics" },
     ];
+
+    // Derive avatar/name from Supabase user object
+    const displayName = user?.user_metadata?.full_name ?? user?.email ?? "User";
+    const avatarUrl = user?.user_metadata?.avatar_url as string | undefined;
+    const initial = (displayName.charAt(0) ?? "U").toUpperCase();
+
+    // Provider badge colours
+    const providerBadge =
+        provider === "google"
+            ? { label: "Google", className: "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800" }
+            : provider === "email"
+            ? { label: "Email", className: "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800" }
+            : null;
 
     return (
         <header className="sticky top-0 z-50 w-full border-b border-gray-200/80 dark:border-gray-800/80 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md transition-colors duration-300">
@@ -49,8 +70,7 @@ export default function Header() {
                             <Link
                                 key={link.name}
                                 href={link.href}
-                                className={`text-sm font-medium transition-colors ${isActive ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                                    }`}
+                                className={`text-sm font-medium transition-colors ${isActive ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"}`}
                             >
                                 {link.name}
                             </Link>
@@ -58,12 +78,13 @@ export default function Header() {
                     })}
                 </nav>
 
-                {/* Profile / Actions */}
-                <div className="flex items-center gap-4">
-                    {/* Mobile Menu Button */}
+                {/* Actions */}
+                <div className="flex items-center gap-3">
+                    {/* Mobile menu toggle */}
                     <button
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                         className="md:hidden p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline-none"
+                        aria-label="Toggle menu"
                     >
                         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             {mobileMenuOpen ? (
@@ -74,6 +95,7 @@ export default function Header() {
                         </svg>
                     </button>
 
+                    {/* Dark mode toggle */}
                     {mounted && (
                         <button
                             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
@@ -92,43 +114,53 @@ export default function Header() {
                         </button>
                     )}
 
-                    {session ? (
-                        <div className="flex items-center gap-4">
-                            <div className="hidden sm:flex items-center gap-2">
-                                <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden border border-gray-300 dark:border-gray-600">
-                                    {session.user?.image ? (
-                                        <img src={session.user.image} alt="Profile" className="h-full w-full object-cover" />
-                                    ) : (
-                                        <span className="text-xs font-bold text-gray-500 dark:text-gray-300">
-                                            {session.user?.name?.charAt(0) || session.user?.email?.charAt(0) || "U"}
-                                        </span>
-                                    )}
-                                </div>
-                                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                                    {session.user?.name || "User"}
-                                </span>
+                    {/* Auth section */}
+                    {!loading && (
+                        user ? (
+                            <div className="flex items-center gap-3">
+                                {/* Provider badge (desktop only) */}
+                                {providerBadge && (
+                                    <span className={`hidden lg:inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${providerBadge.className}`}>
+                                        {providerBadge.label}
+                                    </span>
+                                )}
+
+                                {/* Avatar + name → links to profile */}
+                                <Link href="/profile" className="hidden sm:flex items-center gap-2 group">
+                                    <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden border border-gray-300 dark:border-gray-600 group-hover:ring-2 group-hover:ring-blue-500 transition-all">
+                                        {avatarUrl ? (
+                                            <img src={avatarUrl} alt="Profile" className="h-full w-full object-cover" />
+                                        ) : (
+                                            <span className="text-xs font-bold text-gray-500 dark:text-gray-300">{initial}</span>
+                                        )}
+                                    </div>
+                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors max-w-[120px] truncate">
+                                        {displayName}
+                                    </span>
+                                </Link>
+
+                                <button
+                                    onClick={handleSignOut}
+                                    className="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                                >
+                                    Sign Out
+                                </button>
                             </div>
-                            <button
-                                onClick={() => signOut()}
-                                className="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                        ) : (
+                            <Link
+                                href="/login"
+                                className="rounded-lg bg-gray-900 dark:bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 dark:hover:bg-blue-500 transition-all focus:ring-2 focus:ring-blue-500"
                             >
-                                Sign Out
-                            </button>
-                        </div>
-                    ) : (
-                        <Link
-                            href="/login"
-                            className="rounded-lg bg-gray-900 dark:bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 dark:hover:bg-blue-500 transition-all focus:ring-2 focus:ring-gray-900 dark:focus:ring-blue-600 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
-                        >
-                            Sign In
-                        </Link>
+                                Sign In
+                            </Link>
+                        )
                     )}
                 </div>
             </div>
 
             {/* Mobile Navigation Panel */}
             {mobileMenuOpen && (
-                <div className="md:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-4 space-y-4 shadow-lg absolute w-full">
+                <div className="md:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-4 space-y-3 shadow-lg absolute w-full">
                     {navLinks.map((link) => {
                         const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
                         return (
@@ -142,6 +174,11 @@ export default function Header() {
                             </Link>
                         );
                     })}
+                    {user && (
+                        <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="block text-base font-medium text-gray-600 dark:text-gray-300">
+                            My Profile
+                        </Link>
+                    )}
                 </div>
             )}
         </header>
